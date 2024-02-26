@@ -1,0 +1,17 @@
+postgres:
+  image: postgres
+  tag: 15.2
+  username: postgres
+  password: ""
+
+jellystat:
+  image: cyfershepard/jellystat
+  tag: latest
+
+ingress:
+  enabled: false
+  host: ""
+  ingressClassName: ""
+  tls:
+    enabled: false
+

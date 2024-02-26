@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.jellystat.image }}:{{ .Values.jellystat.tag }}
+        env:
+        - name: POSTGRES_USER
+          value: {{ .Values.postgres.username }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_IP
+          value: "{{ .Release.Name }}-db.{{ .Release.Namespace }}"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: JWT_SECRET
+          value: "no" # Has to be set, will still asks through the UI sadly :(
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: backup-data
+          mountPath: /app/backend/backup-data
+      volumes:
+      - name: backup-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-backup-data-pvc
+      restartPolicy: Always
+
